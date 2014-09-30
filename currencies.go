@@ -154,6 +154,8 @@ func GetRates() <-chan (Rate) {
 	return rates
 }
 
+// Function Convert converts from one currency to another, returning a converted value or an
+// error if either curency does not exist or if the value is <= 0
 func Convert(from, to string, amount float64) (converted float64, err error) {
 	if !validCurrency(from) {
 		return 0, fmt.Errorf("Currency %s does not exist or is not available", from)
