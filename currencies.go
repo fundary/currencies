@@ -89,6 +89,11 @@ func setNewRates(ex *ExchangeRate) {
 	current = ex
 }
 
+func validCurrency(cur string) bool {
+	_, valid := current.Rates[cur]
+	return valid
+}
+
 // Function Latest returns an ExchangeRates object loaded with the latest
 // rates fetched from the api
 func Latest() (ex *ExchangeRate, err error) {
@@ -147,4 +152,20 @@ func GetRates() <-chan (Rate) {
 		}
 	}(*current, rates)
 	return rates
+}
+
+func Convert(from, to string, amount float64) (converted float64, err error) {
+	if !validCurrency(from) {
+		return 0, fmt.Errorf("Currency %s does not exist or is not available", from)
+	}
+	if !validCurrency(to) {
+		return 0, fmt.Errorf("Currency %s does not exist or is not available", to)
+	}
+	if amount <= 0 {
+		return 0, fmt.Errorf("Cannot convert negative or zero value")
+	}
+	from_rate, _ := current.Rates[from]
+	to_rate, _ := current.Rates[to]
+	from_to_rate := to_rate * (1 / from_rate)
+	return amount * from_to_rate, nil
 }
