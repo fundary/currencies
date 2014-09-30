@@ -19,14 +19,14 @@ var testExchangeRates = &ExchangeRate{
 }
 
 func TestAppIdWrongKey(t *testing.T) {
-	err := AppId("someappid")
+	err := AppID("someappid")
 	if err == nil {
 		t.Fatalf("Regexp validation failed")
 	}
 }
 
 func TestAppIdEmptyKey(t *testing.T) {
-	err := AppId("")
+	err := AppID("")
 	if err == nil {
 		t.Fatalf("Accepted empty app_id")
 	}

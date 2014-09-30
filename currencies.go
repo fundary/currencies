@@ -26,7 +26,7 @@ const (
 )
 
 var (
-	appId   string
+	appID   string
 	client  *http.Client
 	current *ExchangeRate
 )
@@ -35,7 +35,7 @@ func init() {
 	client = &http.Client{}
 }
 
-// Type Exchangerate is used to marshal the current rates from the json api
+// ExchangeRate is used to marshal the current rates from the json api
 // at https://openexchangerates.org/documentation
 type ExchangeRate struct {
 	Disclaimer string             `json:"disclaimer"`
@@ -45,16 +45,16 @@ type ExchangeRate struct {
 	Rates      map[string]float64 `json:"rates"`
 }
 
-// Type Rate is used to wrap a single exchange rate value
+// Rate is used to wrap a single exchange rate value
 type Rate struct {
 	Name  string
 	Value float64
 }
 
-// Function AppId sets the local app_id key used to access the api. It validates
+// AppID sets the local app_id key used to access the api. It validates
 // the api key via regexp, so no test of functioning is done and a wrong api key
 // can lead to runtime errors
-func AppId(id string) (err error) {
+func AppID(id string) (err error) {
 	pattern := "[a-zA-Z0-9]{32}"
 	ok, err := regexp.MatchString(pattern, id)
 	if err != nil {
@@ -63,7 +63,7 @@ func AppId(id string) (err error) {
 	if !ok {
 		return fmt.Errorf("Invalid app_id provided")
 	}
-	appId = id
+	appID = id
 	return nil
 }
 
@@ -94,12 +94,12 @@ func validCurrency(cur string) bool {
 	return valid
 }
 
-// Function Latest returns an ExchangeRates object loaded with the latest
+// Latest returns an ExchangeRates object loaded with the latest
 // rates fetched from the api
 func Latest() (ex *ExchangeRate, err error) {
 	ex = new(ExchangeRate)
 	log.Println("Updating exchange rates")
-	url := latest + appId
+	url := latest + appID
 	fmt.Println(url)
 	data, err := doRequest(url)
 	if err != nil {
@@ -112,7 +112,7 @@ func Latest() (ex *ExchangeRate, err error) {
 	return
 }
 
-// Function Updater is launched as a goroutine and updates the current
+// Updater is launched as a goroutine and updates the current
 // vision of the exchange rates of the library from the api
 func Updater(interval time.Duration) {
 	log.Printf("Fetching new currencies every %s\n", interval)
@@ -128,7 +128,7 @@ func Updater(interval time.Duration) {
 	}
 }
 
-// Function GetRate queries the current state of the view of the exchange rates
+// GetRate queries the current state of the view of the exchange rates
 // and returns the rate for the given currency if available or an error if the
 // selected currency does not exist
 func GetRate(cur string) (rate float64, err error) {
@@ -139,7 +139,7 @@ func GetRate(cur string) (rate float64, err error) {
 	return rate, nil
 }
 
-// Function GetRates returns a buffered channel that holds at most the current
+// GetRates returns a buffered channel that holds at most the current
 // number of exchange rates. A slow reading client will receive all the rates
 // as they were at the moment the function was called (a copy of the struct is passed to
 // the inner goroutine)
@@ -154,7 +154,7 @@ func GetRates() <-chan (Rate) {
 	return rates
 }
 
-// Function Convert converts from one currency to another, returning a converted value or an
+// Convert converts from one currency to another, returning a converted value or an
 // error if either curency does not exist or if the value is <= 0
 func Convert(from, to string, amount float64) (converted float64, err error) {
 	if !validCurrency(from) {
@@ -166,8 +166,8 @@ func Convert(from, to string, amount float64) (converted float64, err error) {
 	if amount <= 0 {
 		return 0, fmt.Errorf("Cannot convert negative or zero value")
 	}
-	from_rate, _ := current.Rates[from]
-	to_rate, _ := current.Rates[to]
-	from_to_rate := to_rate * (1 / from_rate)
-	return amount * from_to_rate, nil
+	fromRate, _ := current.Rates[from]
+	toRate, _ := current.Rates[to]
+	fromToRate := toRate * (1 / fromRate)
+	return amount * fromToRate, nil
 }
