@@ -6,6 +6,13 @@ It has no external dependencies and has only the features that are
 needed for the foundary.com project. You can run the go documentation tool
 and get an api overview
 
+Requirements
+============
+
+All monetary values are treated as the Money struct from 
+
+    github.com/hailocab/i18n-go/money
+
 Usage
 =====
 
@@ -26,6 +33,6 @@ You can then use the GetRate to get the rate for a given currency,
 using the standard three letter symbol (ie: Dollars -> USD, Euro -> EUR), and the
 Convert function to convert a given amount from one currency to another
 
-    currencies.Convert("USD", "EUR", 42.0)
+    currencies.Convert(money.New(4200, "USD"), "EUR")
 
 will convert 42 US Dollars in Euro based on the latest rates

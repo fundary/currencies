@@ -17,6 +17,8 @@ import (
 	"net/http"
 	"regexp"
 	"time"
+
+	"github.com/hailocab/i18n-go/money"
 )
 
 const (
@@ -155,19 +157,16 @@ func GetRates() <-chan (Rate) {
 }
 
 // Convert converts from one currency to another, returning a converted value or an
-// error if either curency does not exist or if the value is <= 0
-func Convert(from, to string, amount float64) (converted float64, err error) {
-	if !validCurrency(from) {
-		return 0, fmt.Errorf("Currency %s does not exist or is not available", from)
+// error if either curency does not exist
+func Convert(amount *money.Money, to string) (converted *money.Money, err error) {
+	if !validCurrency(amount.C) {
+		return nil, fmt.Errorf("Currency %s does not exist or is not available", amount.C)
 	}
 	if !validCurrency(to) {
-		return 0, fmt.Errorf("Currency %s does not exist or is not available", to)
+		return nil, fmt.Errorf("Currency %s does not exist or is not available", to)
 	}
-	if amount <= 0 {
-		return 0, fmt.Errorf("Cannot convert negative or zero value")
-	}
-	fromRate, _ := current.Rates[from]
+	fromRate, _ := current.Rates[amount.C]
 	toRate, _ := current.Rates[to]
 	fromToRate := toRate * (1 / fromRate)
-	return amount * fromToRate, nil
+	return money.New(amount.Mulf(fromToRate).Value(), to), nil
 }

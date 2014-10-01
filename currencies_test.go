@@ -4,6 +4,8 @@ import (
 	"log"
 	"testing"
 	"time"
+
+	"github.com/hailocab/i18n-go/money"
 )
 
 var testExchangeRates = &ExchangeRate{
@@ -54,55 +56,43 @@ func TestGetRates(t *testing.T) {
 }
 
 func TestConvertUSDToUSD(t *testing.T) {
-	converted, _ := Convert("USD", "USD", 1.0)
-	if converted != 1.0 {
-		t.Fatalf("Converting USD to USD failed")
+	converted, _ := Convert(money.New(100, "USD"), "USD")
+	if converted.Get() != 1.0 || converted.C != "USD" {
+		t.Fatalf("Converting USD to USD failed: %f", converted.Get())
 	}
 }
 
 func TestConvertWrongValues(t *testing.T) {
-	c, err := Convert("", "USD", 1.0)
-	if c != 0.0 || err == nil {
-		t.Fatalf("Converting with empty FROM succeded")
-	}
-	c, err = Convert("USD", "", 1.0)
-	if c != 0.0 || err == nil {
+	c, err := Convert(money.New(100, "USD"), "")
+	if c != nil || err == nil {
 		t.Fatalf("Converting with empty TO succeded")
-	}
-	c, err = Convert("USD", "EUR", 0.0)
-	if c != 0.0 || err == nil {
-		t.Fatalf("Converting with amount = 0 succeded")
-	}
-	c, err = Convert("USD", "EUR", -42.0)
-	if c != 0.0 || err == nil {
-		t.Fatalf("Converting with amount < 0 succeded")
 	}
 }
 
 func TestConvertEURToUSD(t *testing.T) {
-	converted, _ := Convert("EUR", "USD", 1.0)
-	if float64(int(converted*100))/100 != 1.26 {
+	converted, _ := Convert(money.New(100, "EUR"), "USD")
+	if converted.Get() != 1.26 || converted.C != "USD" {
 		t.Fatalf("Converting 1 EUR to USD: %.32f", converted)
 	}
 }
 
 func TestConvertGBPToUSD(t *testing.T) {
-	converted, _ := Convert("GBP", "USD", 1.0)
-	if float64(int(converted*100))/100 != 1.62 {
+	converted, _ := Convert(money.New(100, "GBP"), "USD")
+	if converted.Get() != 1.62 || converted.C != "USD" {
 		t.Fatalf("Converting 1 GBP to USD: %f", converted)
 	}
 }
 
 func TestConvertUSDInEUR(t *testing.T) {
-	converted, _ := Convert("USD", "EUR", 1.0)
-	if float64(int(converted*100))/100 != 0.79 {
+	converted, _ := Convert(money.New(100, "USD"), "EUR")
+	if converted.Get() != 0.79 || converted.C != "EUR" {
 		t.Fatalf("Converting 1 USD to EUR: %f", converted)
 	}
 }
 
 func TestConvertGBPInEUR(t *testing.T) {
-	converted, _ := Convert("GBP", "EUR", 1.0)
-	if float64(int(converted*100))/100 != 1.28 {
+	converted, _ := Convert(money.New(100, "GBP"), "EUR")
+	if converted.Get() != 1.28 || converted.C != "EUR" {
 		t.Fatalf("Converting 1 GBP to EUR: %f", converted)
 	}
 }
