@@ -16,7 +16,6 @@ import (
 	"log"
 	"net/http"
 	"regexp"
-	"time"
 
 	"github.com/hailocab/i18n-go/money"
 )
@@ -28,7 +27,7 @@ const (
 )
 
 var (
-	appID   string
+	appID   string = ""
 	client  *http.Client
 	current *ExchangeRate
 )
@@ -96,9 +95,10 @@ func validCurrency(cur string) bool {
 	return valid
 }
 
-// Latest returns an ExchangeRates object loaded with the latest
-// rates fetched from the api
-func Latest() (ex *ExchangeRate, err error) {
+func getLatest() (ex *ExchangeRate, err error) {
+	if appID == "" {
+		panic("Required AppID() not configured!")
+	}
 	ex = new(ExchangeRate)
 	log.Println("Updating exchange rates")
 	url := latest + appID
@@ -114,20 +114,17 @@ func Latest() (ex *ExchangeRate, err error) {
 	return
 }
 
-// Updater is launched as a goroutine and updates the current
-// vision of the exchange rates of the library from the api
-func Updater(interval time.Duration) {
-	log.Printf("Fetching new currencies every %s\n", interval)
-	ticker := time.NewTicker(interval)
-	select {
-	case <-ticker.C:
-		ex, err := Latest()
-		if err != nil {
-			log.Printf("Could not update rates: %s", err)
-		} else {
-			setNewRates(ex)
-		}
+// Update is updates the current vision of the exchange rates
+// of the library from the net
+func Update() (err error) {
+	log.Println("Fetching new currencies")
+	ex, err := getLatest()
+	if err != nil {
+		log.Printf("Could not update rates: %s", err)
+		return err
 	}
+	setNewRates(ex)
+	return nil
 }
 
 // GetRate queries the current state of the view of the exchange rates
