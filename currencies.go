@@ -102,7 +102,6 @@ func getLatest() (ex *ExchangeRate, err error) {
 	ex = new(ExchangeRate)
 	log.Println("Updating exchange rates")
 	url := latest + appID
-	fmt.Println(url)
 	data, err := doRequest(url)
 	if err != nil {
 		return nil, err
