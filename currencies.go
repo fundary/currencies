@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"errors"
 	"io"
-	"log"
 	"net/http"
 	"time"
 )
@@ -48,11 +47,10 @@ func (c *OpenExchangeClient) GetLatest() (rates []Rate, err error) {
 	}
 
 	resp, err := c.Client.Get(latest + c.AppID)
-	log.Println(latest + c.AppID)
 	if err != nil {
 		return nil, err
 	} else if resp.StatusCode != 200 {
-		panic(resp.Status)
+		return nil, errors.New(resp.Status)
 	}
 
 	defer resp.Body.Close()
@@ -63,13 +61,12 @@ func (c *OpenExchangeClient) GetLatest() (rates []Rate, err error) {
 	if err := dec.Decode(&ex); err == io.EOF {
 
 	} else if err != nil {
-		panic(err)
+		return nil, err
 	}
-	var rs []Rate
+
 	t := time.Unix(ex.Timestamp, 0)
 	for name, cur := range ex.Rates {
-		rs = append(rs, Rate{Name: name, Value: int64(cur * 100), When: t})
+		rates = append(rates, Rate{Name: name, Value: int64(cur * 100), When: t})
 	}
-	rates = rs
 	return
 }
