@@ -6,7 +6,6 @@ import (
 	"errors"
 	"io"
 	"net/http"
-	"time"
 )
 
 const (
@@ -30,15 +29,8 @@ type exchangeRate struct {
 	Rates      map[string]float64 `json:"rates"`
 }
 
-// Rate is used to wrap a single exchange rate value
-type Rate struct {
-	Name  string
-	Value int64
-	When  time.Time
-}
-
 // Get Latest returns the latest rates.
-func (c *OpenExchangeClient) GetLatest() (rates []Rate, err error) {
+func (c *OpenExchangeClient) GetLatest() (rates map[string]int64, err error) {
 	if c.AppID == "" {
 		return nil, errors.New("No app Id")
 	}
@@ -63,10 +55,9 @@ func (c *OpenExchangeClient) GetLatest() (rates []Rate, err error) {
 	} else if err != nil {
 		return nil, err
 	}
-
-	t := time.Unix(ex.Timestamp, 0)
+	rates = make(map[string]int64)
 	for name, cur := range ex.Rates {
-		rates = append(rates, Rate{Name: name, Value: int64(cur * 100), When: t})
+		rates[name] = int64(cur * 100)
 	}
 	return
 }
